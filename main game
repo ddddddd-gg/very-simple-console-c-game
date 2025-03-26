@@ -1,0 +1,607 @@
+#include <iostream>
+#include <string>
+#include <conio.h>
+
+using namespace std;
+
+bool bobobobob = true;
+std::string n = " ";
+char inp{};
+int hp{100};
+int dmg{25};
+int en_hp{150};
+int en_dmg{30};
+std::string gen_map[1000][1000]{};
+std::string new_arr[1000][1000]{};
+char ch_map{};
+int w{};
+int h{};
+char invr[2] = {'A', 'p'}; //A - armor, p - potion 
+
+
+std::string map[10][37] = //default map
+{
+	{"#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "|", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "|", "Name: ", "s"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "|", "HP: ", "100"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "|", "DMG: ", "25"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "|", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "| w - ↑ ", "|a - ← ", "|s - ↓ ", "|d - →"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", "|", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#"},
+	{"#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#"},
+	{"#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"}
+};
+
+void GenerateMap(int h, int w)
+{
+	int nh = h;
+	if (h < 8)
+	{
+		nh += (h + (7 - h));
+	}
+	//generating map
+	for (int i = 0; i < nh; i++)
+	{
+		for (int j = 0; j < (w + 23); j++) //23 is a max quantity of characters of menu
+		{
+			if (i == 0 || i == (h - 1))
+			{
+				if (j < w)
+				{
+					gen_map[i][j] = "#";
+				}
+			}
+
+			if (j == 0 || j == (w - 1))
+			{
+				if (i > 0 && i < (h - 1))
+				{
+					gen_map[i][j] = "#";
+				}
+			}
+
+			if (i > 0 && i < (h - 1))
+			{
+				if (j > 0 && j < (w - 1))
+				{
+					gen_map[i][j] = ".";
+				}
+			}
+
+			if (j == w)
+			{
+				if (i >= 0 && i < 7)
+				{
+					gen_map[i][j] = "|";
+				}
+			}
+
+			if (j > w)
+			{
+				if (i == 0 || i == 6 || i == 4)
+				{
+					gen_map[i][j] = "#";
+				}
+			}
+
+			if (i > (h - 1) && j < w) //it's crutches, but...
+			{
+				gen_map[i][j] = " ";
+			}
+
+			if (i == 1 && j == (w + 1))
+			{
+				gen_map[i][j] = "Name: ";
+			}
+
+			if (i == 2 && j == (w + 1))
+			{
+				gen_map[i][j] = "HP: ";
+				gen_map[i][j + 1] = "100";
+			}
+
+			if (i == 3 && j == (w + 1))
+			{
+				gen_map[i][j] = "DMG: ";
+				gen_map[i][j + 1] = "25";
+			}
+
+			if (i == 5 && j == (w + 1))
+			{
+				gen_map[i][j] = " w - ↑ |a - ← |s - ↓ |d - →";
+			}
+		}
+	}
+}
+
+int GetMapI()
+{
+	int map_i{};
+	if (ch_map == 's')
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			map_i++;
+		}
+	}
+	else if (ch_map == 'g')
+	{
+		int nh = h;
+		if (h < 8)
+		{
+			nh += (h + (7 - h));
+		}
+		for (int i = 0; i < nh; i++)
+		{
+			map_i++;
+		}
+	}
+
+	return map_i;
+}
+
+int GetMapJ()
+{
+	int map_j{};
+	if (ch_map == 's')
+	{
+		for (int j = 0; j < 37; j++)
+		{
+			map_j++;
+		}
+	}
+	else if (ch_map == 'g')
+	{
+		int nh = h;
+		if (h < 8)
+		{
+			nh += (h + (7 - h));
+		}
+		for (int j = 0; j < (w + 23); j++)
+		{
+			map_j++;
+		}
+	}
+
+	return map_j;
+}
+
+int FindPlayerI()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int cr_i{};
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (new_arr[i][j] == "P")
+			{
+				cr_i = i;
+			}
+		}
+	}
+	return cr_i;
+}
+
+int FindPlayerJ()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int cr_j{};
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (new_arr[i][j] == "P")
+			{
+				cr_j = j;
+			}
+		}
+	}
+	return cr_j;
+}
+
+int FindEnemyI()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int cr_i{};
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (new_arr[i][j] == "E")
+			{
+				cr_i = i;
+			}
+		}
+	}
+	return cr_i;
+}
+
+int FindEnemyJ()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int cr_j{};
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (new_arr[i][j] == "E")
+			{
+				cr_j = j;
+			}
+		}
+	}
+	return cr_j;
+}
+
+
+void PlayerMovement()
+{
+	//acess to go to some direction
+	bool acs_w = false;
+	bool acs_a = false;
+	bool acs_s = false;
+	bool acs_d = false;
+
+	//current player position
+	int cr_i = FindPlayerI();
+	int cr_j = FindPlayerJ();
+	
+		if (new_arr[cr_i - 1][cr_j] == ".") //up
+		{
+			acs_w = true;
+		}
+
+		if (new_arr[cr_i + 1][cr_j] == ".") //down
+		{
+			acs_s = true;
+		}
+
+		if (new_arr[cr_i][cr_j + 1] == ".") //right
+		{
+			acs_d = true;
+		}
+
+		if (new_arr[cr_i][cr_j - 1] == ".") //left
+		{
+			acs_a = true;
+		}
+
+		if (inp == 'w' || inp == 'W')
+		{
+			if (acs_w == true)
+			{
+				new_arr[cr_i][cr_j] = ".";
+				new_arr[cr_i - 1][cr_j] = "P";
+			}
+			else
+			{
+				cout << "туда идти нельзя!!" << endl;
+			}
+		}
+
+		if (inp == 'd' || inp == 'D')
+		{
+			if (acs_d == true)
+			{
+				new_arr[cr_i][cr_j] = ".";
+				new_arr[cr_i][cr_j + 1] = "P";
+			}
+			else
+			{
+				cout << "туда идти нельзя!!" << endl;
+			}
+		}
+
+		if (inp == 's' || inp == 'S')
+		{
+			if (acs_s == true)
+			{
+				new_arr[cr_i][cr_j] = ".";
+				new_arr[cr_i + 1][cr_j] = "P";
+			}
+			else
+			{
+				cout << "туда идти нельзя!!" << endl;
+			}
+		}
+
+		if (inp == 'a' || inp == 'A')
+		{
+			if (acs_a == true)
+			{
+				new_arr[cr_i][cr_j] = ".";
+				new_arr[cr_i][cr_j - 1] = "P";
+			}
+			else
+			{
+				cout << "you can't go there!!" << endl;
+			}
+		}
+		
+}
+
+bool EnemyAttacks() //attaks
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int cr_i = FindPlayerI();
+	int cr_j = FindPlayerJ();
+	
+	if (hp > 0 && hp >= en_dmg)
+	{
+		hp -= en_dmg;
+		for (int i = 0; i < map_i; i++)
+		{
+			for (int j = 0; j < map_j; j++)
+			{
+				if (new_arr[i][j] == "HP: ")
+				{
+					new_arr[i][j + 1] = to_string(hp);
+				}
+			}
+		}
+	}
+	else
+	{
+		new_arr[cr_i][cr_j] = "X";
+		cout << "тебя убили(((" << endl;
+		cout << "нажми E, чтобы выйти" << endl;
+		if (_getch() == 'e')
+		{
+			bobobobob = false;
+			return bobobobob;
+		}
+	}
+}
+
+
+void PlayerAttack()
+{
+	if (inp == 'x' || inp == 'X')
+	{
+		int cr_i = FindPlayerI();
+		int cr_j = FindPlayerJ();
+
+		if (new_arr[cr_i][cr_j + 1] == "E")
+		{
+			if (en_hp > 0)
+			{
+				en_hp -= dmg;
+				cout << "(E потерял 20 хп)" << endl;
+			}
+			else
+			{
+				cout << "enzz - " << new_arr[cr_i][cr_j + 1] << endl;
+				new_arr[cr_i][cr_j + 1] = ".";
+			}
+			
+		}
+
+		if (new_arr[cr_i][cr_j - 1] == "E")
+		{
+			if (en_hp > 0)
+			{
+				en_hp -= dmg;
+				cout << "(E потерял 20 хп)" << endl;
+			}
+			else
+			{
+				cout << "enzz - " << new_arr[cr_i][cr_j - 1] << endl;
+				new_arr[cr_i][cr_j - 1] = ".";
+			}
+
+		}
+
+		if (new_arr[cr_i + 1][cr_j] == "E")
+		{
+			if (en_hp > 0)
+			{
+				en_hp -= dmg;
+				cout << "(E потерял 20 хп)" << endl;
+			}
+			else
+			{
+				cout << "enzz - " << new_arr[cr_i + 1][cr_j] << endl;
+				new_arr[cr_i + 1][cr_j] = ".";
+			}
+
+		}
+
+		if (new_arr[cr_i - 1][cr_j] == "E")
+		{
+			if (en_hp > 0)
+			{
+				en_hp -= dmg;
+				cout << "(E потерял 20 хп)" << endl;
+			}
+			else
+			{
+				new_arr[cr_i - 1][cr_j] = ".";
+			}
+
+		}
+	}
+}
+
+void New_Array()
+{
+	if (ch_map == 'g')
+	{
+
+		int nh = h;
+		if (h < 8)
+		{
+			nh += (h + (7 - h));
+		}
+		for (int i = 0; i < nh; i++)
+		{
+			for (int j = 0; j < (w + 23); j++)
+			{
+				new_arr[i][j] = gen_map[i][j];
+			}
+		}
+	}
+	else if (ch_map == 's')
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 37; j++)
+			{
+				new_arr[i][j] = map[i][j];
+			}
+		}
+	}
+}
+
+void DisplayMap()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			cout << new_arr[i][j] << " ";
+			if (j == (map_j - 1))
+			{
+				cout << endl;
+			}
+		}
+	}
+	cout << endl;
+}
+
+int Random(int min, int max)
+{
+	int rand_int = rand() % max + min;
+	return rand_int;
+}
+
+void RandomPlace()
+{
+	int min_i{1};
+	int max_i{0};
+	int min_j{2};
+	int max_j{0};
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (i == 1 && j == 1)
+			{
+				new_arr[i][j] = "P";
+			}
+
+			if (new_arr[i][j] == ".")
+			{
+				if (i > 0 && j == 2 && i < (map_i - 1))
+				{
+					max_i++;
+				}
+				if (j > 1 && i == 2)
+				{
+					max_j++;
+				}
+			}
+		}
+	}
+	new_arr[Random(min_i, max_i)][Random(min_j, max_j)] = "E";
+	new_arr[Random(min_i, max_i)][Random(min_j, max_j)] = "A";
+	new_arr[Random(min_i, max_i)][Random(min_j, max_j)] = "p";
+}
+
+void NameRenaming()
+{
+	int map_i = GetMapI();
+	int map_j = GetMapJ();
+	int ci{};
+	int cj{};
+	for (int i = 0; i < map_i; i++)
+	{
+		for (int j = 0; j < map_j; j++)
+		{
+			if (new_arr[i][j] == "s")
+			{
+				ci = i;
+				cj = j;
+			}
+
+		}
+	}
+	new_arr[ci][cj] = n;
+}
+
+void Armour()
+{
+	en_dmg -= 10; 
+}
+
+void Potion()
+{
+	dmg += 15;
+}
+
+int main()
+{
+	cout << "введите имя:" << endl;
+	cin >> n;
+	cout << "выберите тип карты (s - стандартная, g - генерируемая):" << endl;
+	cin >> ch_map; 
+	if (ch_map == 'g' || ch_map == 'G')
+	{
+		cout << "введите ширину(рекомендуется больше 8):" << endl;
+		cin >> w;
+		cout << "введите высоту(рекомендуется больше 8):" << endl;
+		cin >> h;
+		GenerateMap(h, w);
+	}
+	New_Array();
+	RandomPlace();
+	NameRenaming();
+	while (bobobobob == true)
+	{
+		int en_i = FindEnemyI();
+		int en_j = FindEnemyJ();
+		int cr_i = FindPlayerI();
+		int cr_j = FindPlayerJ();
+		DisplayMap();
+		inp = _getch();
+		if (inp == 'w' || inp == 'W' || inp == 's' || inp == 'S' || inp == 'a' || inp == 'A' || inp == 'd' || inp == 'D')
+		{
+			PlayerMovement();
+		}
+		if (inp == 'x' || inp == 'X')
+		{
+			PlayerAttack();
+		}
+		if (new_arr[en_i][en_j + 1] == "P" || new_arr[en_i][en_j - 1] == "P" || new_arr[en_i + 1][en_j] == "P" || new_arr[en_i - 1][en_j] == "P")
+		{
+			EnemyAttacks();
+		}
+		if (new_arr[cr_i][cr_j + 1] == "A" || new_arr[cr_i][cr_j - 1] == "A" || new_arr[cr_i + 1][cr_j] == "A" || new_arr[cr_i - 1][cr_j] == "A")
+		{
+			cout << "применить броню?(д\\н)" << endl;
+			if (_getch() == 'д')
+			{
+				Armour();
+			}
+		}
+		if (new_arr[cr_i][cr_j + 1] == "p" || new_arr[cr_i][cr_j - 1] == "p" || new_arr[cr_i + 1][cr_j] == "p" || new_arr[cr_i - 1][cr_j] == "p")
+		{
+			cout << "применить броню?(д\\н)" << endl;
+			if (_getch() == 'д')
+			{
+				Potion();
+			}
+		}
+	}
+	
+}
